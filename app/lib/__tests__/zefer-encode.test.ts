@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { encodeZefer, parseFile } from "../zefer";
+import { encodeZefer, parseFile, decodeZefer } from "../zefer";
 
 const LOW_ITERATIONS = 1000;
 const TEST_PASSPHRASE = "testpass123";
@@ -37,6 +37,36 @@ describe("encodeZefer without reveal key", () => {
 
     const bytes = await blobToBytes(blob);
     expect(readMagic(bytes)).toEqual([0x5a, 0x45, 0x46, 0x42, 0x33]);
+  });
+});
+
+// ─── 1b. encodeZefer with fileBlob (streaming large-file path) ───
+
+describe("encodeZefer with fileBlob", () => {
+  it("streams a file given as a Blob and round-trips via decodeZefer", async () => {
+    const original = new Uint8Array([5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
+    const zefer = await encodeZefer({
+      fileBlob: new Blob([original]),
+      passphrase: TEST_PASSPHRASE,
+      fileName: "data.bin",
+      fileType: "application/octet-stream",
+      expiresAt: 0,
+      iterations: LOW_ITERATIONS,
+    });
+
+    const bytes = await blobToBytes(zefer);
+    expect(readMagic(bytes)).toEqual([0x5a, 0x45, 0x46, 0x42, 0x33]);
+
+    // Decode via the streaming Blob path (Stage 2) — round-trips end to end.
+    const result = await decodeZefer("", TEST_PASSPHRASE, { fileBlob: zefer });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.header.mode).toBe("file");
+      expect(result.payload.meta.fileName).toBe("data.bin");
+      expect(result.payload.meta.fileSize).toBe(original.length);
+      const out = new Uint8Array(await (result.payload.fileData as Blob).arrayBuffer());
+      expect(out).toEqual(original);
+    }
   });
 });
 
@@ -101,7 +131,7 @@ describe("ZEFR3 format structure", () => {
     // The main block starts after the 4-byte size prefix
     const mainStart = dataOffset + 4;
     const mainBlock = bytes.slice(mainStart, mainStart + mainBlockSize);
-    expect(mainBlock.length).toBe(mainBlockSize);
+    expect(mainBlock).toHaveLength(mainBlockSize);
 
     // The reveal block occupies the remaining bytes
     const revealBlock = bytes.slice(mainStart + mainBlockSize);
@@ -183,12 +213,12 @@ describe("parseFile ZEFR3 block splitting", () => {
     expect(parsed).not.toBeNull();
 
     // binaryData length must equal mainBlockSize
-    expect(parsed!.binaryData!.length).toBe(mainBlockSize);
+    expect(parsed!.binaryData!).toHaveLength(mainBlockSize);
 
     // revealBinaryData must have the remaining bytes
     const mainStart = dataOffset + 4;
     const expectedRevealLen = bytes.length - (mainStart + mainBlockSize);
-    expect(parsed!.revealBinaryData!.length).toBe(expectedRevealLen);
+    expect(parsed!.revealBinaryData!).toHaveLength(expectedRevealLen);
     expect(parsed!.revealBinaryData!.length).toBeGreaterThan(0);
   });
 });
@@ -239,7 +269,7 @@ describe("parseFile with text format (ZEFER3)", () => {
     expect(parsed!.header.iterations).toBe(600000);
     expect(parsed!.header.mode).toBe("text");
     expect(parsed!.encryptedLines).toBeDefined();
-    expect(parsed!.encryptedLines!.length).toBe(1);
+    expect(parsed!.encryptedLines!).toHaveLength(1);
     expect(parsed!.encryptedLines![0]).toBe("SOMEBASE64ENCRYPTEDDATA==");
   });
 
@@ -258,7 +288,7 @@ describe("parseFile with text format (ZEFER3)", () => {
     expect(parsed!.binary).toBe(false);
     expect(parsed!.header.compression).toBe("gzip");
     expect(parsed!.header.hint).toBe("my hint");
-    expect(parsed!.encryptedLines!.length).toBe(3);
+    expect(parsed!.encryptedLines!).toHaveLength(3);
   });
 
   it("defaults mode to 'text' when header lacks mode field", () => {

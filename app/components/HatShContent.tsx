@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Shield, Lock, Clock, Globe, Key, KeyRound, Eye, FileText, Zap,
   CheckCircle2, XCircle, ArrowRight, ExternalLink, HelpCircle, Cpu,
@@ -7,11 +8,13 @@ import {
 import { PageLayout, PageHeader, GlassCard } from "@/app/components/ui";
 import { useLanguage } from "@/app/components/LanguageProvider";
 
+type FeatureStatus = "yes" | "no" | "partial";
+
 const FEATURES: {
   key: string;
   icon: typeof Shield;
-  zefer: "yes" | "no" | "partial";
-  hatsh: "yes" | "no" | "partial";
+  zefer: FeatureStatus;
+  hatsh: FeatureStatus;
 }[] = [
   { key: "vs.feat.encryption", icon: Lock, zefer: "yes", hatsh: "yes" },
   { key: "vs.feat.browseronly", icon: Globe, zefer: "yes", hatsh: "yes" },
@@ -31,7 +34,7 @@ const FEATURES: {
   { key: "vs.feat.i18n", icon: Globe, zefer: "partial", hatsh: "yes" },
 ];
 
-function StatusIcon({ status }: { status: "yes" | "no" | "partial" }) {
+function StatusIcon({ status }: Readonly<{ status: FeatureStatus }>) {
   if (status === "yes") return <CheckCircle2 className="w-4 h-4 text-primary" />;
   if (status === "no") return <XCircle className="w-4 h-4 theme-faint" />;
   return <CheckCircle2 className="w-4 h-4 text-[var(--warning-text)]" />;
@@ -189,9 +192,9 @@ export default function HatShContent() {
       <GlassCard glow className="text-center">
         <h2 className="text-lg font-semibold theme-heading mb-2">{t("vs.cta.title")}</h2>
         <p className="text-sm theme-muted mb-5">{t("vs.cta.desc")}</p>
-        <a href="/" className="btn-primary !w-auto inline-flex px-8">
+        <Link href="/" className="btn-primary !w-auto inline-flex px-8">
           {t("vs.cta.button")} <ArrowRight className="w-4 h-4" />
-        </a>
+        </Link>
       </GlassCard>
     </PageLayout>
   );

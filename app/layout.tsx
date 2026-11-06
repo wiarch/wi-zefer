@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/app/components/ThemeProvider";
 import LegalBanner from "@/app/components/LegalBanner";
 import DonateFab from "@/app/components/DonateFab";
 import ToastProvider from "@/app/components/ToastProvider";
+import KeyboardShortcuts from "@/app/components/KeyboardShortcuts";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -51,9 +52,9 @@ export const metadata: Metadata = {
     "encrypt files",
     "PBKDF2",
   ],
-  authors: [{ name: "Jose Carrillo", url: "https://carrillo.app" }],
-  creator: "Jose Carrillo",
-  publisher: "Jose Carrillo",
+  authors: [{ name: "José Carrillo", url: "https://carrillo.app" }],
+  creator: "José Carrillo",
+  publisher: "José Carrillo",
   robots: {
     index: true,
     follow: true,
@@ -77,10 +78,11 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@carrilloapps",
+    creator: "@carrilloapps",
     title: "Zefer — Share Secrets Securely",
     description:
       "Encrypt secrets into .zefer files. 100% client-side, AES-256-GCM, no servers.",
-    creator: "@carrilloapps",
   },
   alternates: {
     canonical: siteUrl,
@@ -101,6 +103,14 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Apply the saved/preferred theme before paint to avoid a flash now
+            that content is server-rendered in the default (dark) theme. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('zefer-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})()",
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.github.com" />
@@ -156,6 +166,10 @@ export default function RootLayout({
                   "https://github.com/carrilloapps",
                   "https://linkedin.com/in/carrilloapps",
                   "https://x.com/carrilloapps",
+                  "https://bsky.app/profile/carrillo.app",
+                  "https://dev.to/carrilloapps",
+                  "https://carrilloapps.substack.com",
+                  "https://stackoverflow.com/users/14580648",
                 ],
               },
               sourceOrganization: {
@@ -164,7 +178,7 @@ export default function RootLayout({
                 url: "https://carrillo.app",
               },
               license: "https://opensource.org/licenses/MIT",
-              softwareVersion: "0.7.0",
+              softwareVersion: "0.12.0",
               inLanguage: ["en", "es", "pt"],
               isAccessibleForFree: true,
               installUrl: "https://zefer.carrillo.app/install",
@@ -188,6 +202,7 @@ export default function RootLayout({
               <LegalBanner />
             </div>
             <ToastProvider />
+            <KeyboardShortcuts />
           </LanguageProvider>
         </ThemeProvider>
       </body>

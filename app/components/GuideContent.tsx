@@ -65,7 +65,7 @@ const URL_PARAMS = [
   { param: "ips", desc: "install.guide.param.ips" },
 ] as const;
 
-function StepList({ steps, icon: SectionIcon, title, t }: { steps: readonly { icon: typeof FileText; key: string }[]; icon: typeof Lock; title: string; t: (key: string) => string }) {
+function StepList({ steps, icon: SectionIcon, title, t }: Readonly<{ steps: readonly { icon: typeof FileText; key: string }[]; icon: typeof Lock; title: string; t: (key: string) => string }>) {
   return (
     <div className="mb-10">
       <div className="flex items-center gap-2 mb-4">
@@ -101,7 +101,7 @@ export default function GuideContent() {
             <p className="text-xs theme-muted">{t("install.guide.quickstart.desc")}</p>
           </div>
         </div>
-        <a href="/" className="btn-primary">{t("install.web.cta")} <ArrowRight className="w-4 h-4" /></a>
+        <Link href="/" className="btn-primary">{t("install.web.cta")} <ArrowRight className="w-4 h-4" /></Link>
       </GlassCard>
 
       {/* ─── Encrypt ─── */}

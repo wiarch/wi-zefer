@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import {
   Cpu,
-  Monitor,
-  Smartphone,
   Gauge,
   Shield,
   ArrowRight,
   CheckCircle2,
   AlertTriangle,
-  ExternalLink,
 } from "lucide-react";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
@@ -18,18 +16,37 @@ import { analyzeDevice, formatBytes, type DeviceLimits } from "@/app/lib/device"
 import { benchmarkDevice } from "@/app/lib/crypto";
 import { useLanguage } from "@/app/components/LanguageProvider";
 
+// ─── External store ───
+//
+// The hardware profile comes from `navigator` — an external system that never
+// changes while the page is open. Reading it through useSyncExternalStore
+// keeps the server render on `null` (so hydration matches) and publishes the
+// real profile immediately afterwards, without a setState-in-effect.
+let deviceSnapshot: DeviceLimits | null = null;
+
+function getDeviceSnapshot(): DeviceLimits {
+  deviceSnapshot ??= analyzeDevice();
+  return deviceSnapshot;
+}
+
+function getServerDeviceSnapshot(): DeviceLimits | null {
+  return null;
+}
+
+function subscribeDevice(): () => void {
+  return () => {};
+}
+
 export default function DeviceContent() {
   const { t } = useLanguage();
-  const [limits, setLimits] = useState<DeviceLimits | null>(null);
+  const limits = useSyncExternalStore(subscribeDevice, getDeviceSnapshot, getServerDeviceSnapshot);
   const [benchmark, setBenchmark] = useState<number | null>(null);
 
   useEffect(() => {
-    setLimits(analyzeDevice());
     benchmarkDevice().then(setBenchmark).catch(() => {});
   }, []);
 
-  if (!limits) return null;
-  const { profile } = limits;
+  const profile = limits?.profile;
 
   return (
     <main className="flex-1 flex flex-col">
@@ -60,37 +77,43 @@ export default function DeviceContent() {
               {t("devicepage.your")}
             </h2>
 
-            <div className="glass !rounded-xl overflow-hidden mb-4">
-              <table className="w-full">
-                <tbody className="divide-y divide-[var(--glass-border)]">
-                  {([
-                    ["CPU Cores", `${profile.cores}`],
-                    ["CPU Architecture", profile.cpuArch],
-                    [`RAM (${t("devicepage.reported")})`, profile.ram > 0 ? `${profile.ram} GB` : null],
-                    ["GPU Renderer", profile.gpu],
-                    ["GPU Vendor", profile.gpuVendor],
-                    [t("device.type"), profile.mobile ? "Mobile" : "Desktop"],
-                    [t("devicepage.platform"), profile.platform],
-                    ["User Agent", profile.userAgent || null],
-                    ["JS Heap Limit", profile.heapLimit ? formatBytes(profile.heapLimit) : null],
-                    [`JS Heap (${t("devicepage.used")})`, profile.heapUsed ? formatBytes(profile.heapUsed) : null],
-                    ["JS Heap Total", profile.heapTotal ? formatBytes(profile.heapTotal) : null],
-                    ["PBKDF2 (100k iter.)", benchmark !== null ? `${benchmark.toFixed(0)} ms` : null],
-                  ] as [string, string | null][]).map(([label, value]) => (
-                    <tr key={label}>
-                      <td className="text-xs theme-muted px-4 py-3 whitespace-nowrap align-top">{label}</td>
-                      <td className="text-xs font-mono theme-heading px-4 py-3 text-right break-all">
-                        {value || <span className="theme-warning">N/A</span>}
-                      </td>
+            {limits && profile ? (
+              <div className="glass !rounded-xl overflow-hidden mb-4">
+                <table className="w-full">
+                  <tbody className="divide-y divide-[var(--glass-border)]">
+                    {([
+                      ["CPU Cores", `${profile.cores}`],
+                      ["CPU Architecture", profile.cpuArch],
+                      [`RAM (${t("devicepage.reported")})`, profile.ram > 0 ? `${profile.ram} GB` : null],
+                      ["GPU Renderer", profile.gpu],
+                      ["GPU Vendor", profile.gpuVendor],
+                      [t("device.type"), profile.mobile ? "Mobile" : "Desktop"],
+                      [t("devicepage.platform"), profile.platform],
+                      ["User Agent", profile.userAgent || null],
+                      ["JS Heap Limit", profile.heapLimit ? formatBytes(profile.heapLimit) : null],
+                      [`JS Heap (${t("devicepage.used")})`, profile.heapUsed ? formatBytes(profile.heapUsed) : null],
+                      ["JS Heap Total", profile.heapTotal ? formatBytes(profile.heapTotal) : null],
+                      ["PBKDF2 (100k iter.)", benchmark !== null ? `${benchmark.toFixed(0)} ms` : null],
+                    ] as [string, string | null][]).map(([label, value]) => (
+                      <tr key={label}>
+                        <td className="text-xs theme-muted px-4 py-3 whitespace-nowrap align-top">{label}</td>
+                        <td className="text-xs font-mono theme-heading px-4 py-3 text-right break-all">
+                          {value || <span className="theme-warning">N/A</span>}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="bg-[var(--glass-bg)]">
+                      <td className="text-xs font-medium text-primary px-4 py-3">{t("devicepage.maxfile")}</td>
+                      <td className="text-sm font-mono font-bold text-primary px-4 py-3 text-right">{limits.maxFileSizeLabel}</td>
                     </tr>
-                  ))}
-                  <tr className="bg-[var(--glass-bg)]">
-                    <td className="text-xs font-medium text-primary px-4 py-3">{t("devicepage.maxfile")}</td>
-                    <td className="text-sm font-mono font-bold text-primary px-4 py-3 text-right">{limits.maxFileSizeLabel}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="glass !rounded-xl p-6 mb-4 text-center text-xs theme-muted" aria-live="polite">
+                {t("devicepage.detecting")}
+              </div>
+            )}
           </div>
 
           {/* How the calculation works */}
@@ -163,8 +186,8 @@ export default function DeviceContent() {
                 <div key={browser.title} className="glass glass-hover !rounded-xl p-4 transition-all duration-300">
                   <h3 className="text-xs font-semibold theme-heading mb-2">{browser.title}</h3>
                   <ul className="space-y-1.5">
-                    {t(browser.tips as Parameters<typeof t>[0]).split("|").map((tip, i) => (
-                      <li key={i} className="flex items-start gap-2 text-[12px] theme-muted">
+                    {t(browser.tips as Parameters<typeof t>[0]).split("|").map((tip) => (
+                      <li key={tip} className="flex items-start gap-2 text-[12px] theme-muted">
                         <CheckCircle2 className="w-3 h-3 text-primary shrink-0 mt-0.5" />
                         <span>{tip}</span>
                       </li>
@@ -186,9 +209,9 @@ export default function DeviceContent() {
 
           {/* CTA */}
           <div className="text-center">
-            <a href="/" className="btn-primary !w-auto inline-flex px-8">
+            <Link href="/" className="btn-primary !w-auto inline-flex px-8">
               {t("how.cta")} <ArrowRight className="w-4 h-4" />
-            </a>
+            </Link>
           </div>
         </div>
       </section>

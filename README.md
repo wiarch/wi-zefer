@@ -9,12 +9,14 @@
 Client-side encryption tool that converts text and files into password-protected `.zefer` files using AES-256-GCM. 100% browser-based — no servers, no traces, no cookies.
 
 [![Live](https://img.shields.io/badge/Live-zefer.carrillo.app-22c55e?style=flat-square)](https://zefer.carrillo.app)
+[![Wiki](https://img.shields.io/badge/docs-Wiki-22c55e?style=flat-square&logo=github&logoColor=white)](https://github.com/carrilloapps/zefer/wiki)
 [![CLI](https://img.shields.io/npm/v/zefer-cli?style=flat-square&color=22c55e&label=CLI)](https://www.npmjs.com/package/zefer-cli)
 [![License](https://img.shields.io/github/license/carrilloapps/zefer?style=flat-square&color=22c55e)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-161%20passed-22c55e?style=flat-square)](https://github.com/carrilloapps/zefer)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-22c55e?style=flat-square)](https://github.com/carrilloapps/zefer)
+[![CI](https://img.shields.io/github/actions/workflow/status/carrilloapps/zefer/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/carrilloapps/zefer/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-969%20passed-22c55e?style=flat-square)](https://github.com/carrilloapps/zefer/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-22c55e?style=flat-square)](https://github.com/carrilloapps/zefer/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-16.2.7-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.3.5-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=000)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-06b6d4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![WCAG 2.1 AA](https://img.shields.io/badge/WCAG%202.1-AA-22c55e?style=flat-square)](https://www.w3.org/WAI/WCAG21/quickref/)
@@ -79,6 +81,14 @@ zefer info secret.zefer
 
 **Standalone binary (no Node.js required):** download for [Linux x64](https://github.com/carrilloapps/zefer-cli/releases/latest/download/zefer-linux-x64) · [Linux ARM64](https://github.com/carrilloapps/zefer-cli/releases/latest/download/zefer-linux-arm64) · [macOS Intel](https://github.com/carrilloapps/zefer-cli/releases/latest/download/zefer-macos-x64) · [macOS Apple Silicon](https://github.com/carrilloapps/zefer-cli/releases/latest/download/zefer-macos-arm64) · [Windows x64](https://github.com/carrilloapps/zefer-cli/releases/latest/download/zefer-win-x64.exe)
 
+**As a library (v1.3.0+):** since v1.3.0, `zefer-cli` also exposes a programmatic API (ESM + CommonJS), so you can embed the same engine in your own Node.js code:
+
+```js
+import { encodeZefer, decodeZefer, generateWithOptions, analyzePassword } from "zefer-cli";
+```
+
+In total, zefer-cli runs three ways: **CLI**, **MCP server** (`zefer mcp`), and **library** — all producing cross-compatible `.zefer` files. Full library guide: [zefer.carrillo.app/library](https://zefer.carrillo.app/library).
+
 [![npm](https://img.shields.io/npm/v/zefer-cli?style=flat-square&color=22c55e)](https://www.npmjs.com/package/zefer-cli)
 [![CLI repo](https://img.shields.io/badge/GitHub-zefer--cli-181717?style=flat-square&logo=github)](https://github.com/carrilloapps/zefer-cli)
 
@@ -118,7 +128,7 @@ zefer info secret.zefer
 - [`/analyzer`](https://zefer.carrillo.app/analyzer) — `.zefer` file inspector: public header, KDF level, compression — no passphrase needed
 - Real-time progress bar with device benchmarking
 - Drag-and-drop file upload
-- 161 tests, 100% line coverage
+- 969 tests, 100% coverage (statements, branches, functions, lines)
 
 </td>
 <td width="50%">
@@ -202,24 +212,28 @@ Open [http://localhost:3000](http://localhost:3000).
 ### Verify
 
 ```bash
-npm test              # 161 tests
-npx tsc --noEmit      # Type check
-npm run build         # Production build
+npm run lint           # ESLint
+npm run typecheck      # tsc --noEmit
+npm run test:coverage  # 969 tests behind the 100% coverage gate
+npm run build          # Production build
+npm run validate       # all of the above
 ```
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Framework | [Next.js 16.2.7](https://nextjs.org/) (React 19) |
+| Framework | [Next.js 16.3.5](https://nextjs.org/) (React 19) |
 | Language | [TypeScript 6](https://www.typescriptlang.org/) |
 | Styling | [Tailwind CSS v4](https://tailwindcss.com/) |
 | Encryption | Web Crypto API (AES-256-GCM) |
 | Key Derivation | PBKDF2-SHA256 (300k-1M iterations) |
 | Compression | CompressionStream API (Gzip/Deflate) |
+| UI primitives | [Radix UI](https://www.radix-ui.com/) (Dialog, DropdownMenu, Popover, Select, Tooltip, Tabs, Switch) |
 | Icons | [Lucide React](https://lucide.dev/) |
 | Notifications | [Sonner](https://sonner.emilkowal.dev/) |
-| Testing | [Vitest](https://vitest.dev/) + @vitest/coverage-v8 |
+| Testing | [Vitest](https://vitest.dev/) + @vitest/coverage-v8 + @testing-library/react (jsdom) |
+| CI | GitHub Actions — `ci.yml` (lint, typecheck, coverage, build) and `security.yml` (Semgrep, Trivy, Gitleaks, SonarQube) |
 | Hosting | [Vercel](https://vercel.com/) / Any static host |
 
 ## Project Structure
@@ -228,29 +242,33 @@ npm run build         # Production build
 app/
   api/
     author/route.ts       # GitHub profile API (cached 1h)
-  components/             # 24 client components
+  components/             # 34 client components
     EncryptForm.tsx        # Encrypt text/files
     DecryptForm.tsx        # Decrypt .zefer files
     HomeContent.tsx        # Home page with tabs
     KeyGenerator.tsx       # Secure key generator popover
     CryptoProgress.tsx     # Encryption/decryption progress bar
-    ...                    # 19 more components
+    ...                    # 29 more components
   lib/
     crypto.ts             # AES-256-GCM + PBKDF2 + benchmarking
     zefer.ts              # .zefer format encode/decode (ZEFB3/ZEFR3)
     chunked-crypto.ts     # Chunked encryption (16MB per chunk)
     compression.ts        # Gzip/Deflate via CompressionStream
     device.ts             # RAM/CPU/GPU detection + file limits
-    i18n.ts               # Translations (es/en/pt, ~415 keys)
+    i18n.ts               # Translations (es/en/pt, ~1,045 keys)
     ip.ts                 # IP detection and restriction
     notify.ts             # Toast notification helpers
     preferences.ts        # Persisted user preferences
     progress.ts           # Encryption progress tracking
-    __tests__/            # 125 Vitest tests (7 files)
+    seo.ts                # Centralized page metadata
+    useUrlParams.ts       # URL parameter parsing (long + short aliases)
+    file-handoff.ts       # File transfer between forms
+    __tests__/            # Vitest unit suites
   globals.css             # Design system (liquid glass, theming)
   layout.tsx              # Root layout + providers
   page.tsx                # Home page
-docs/                     # Architecture, Security, Deployment, Contributing
+  **/__tests__/           # 969 Vitest tests across 60 files
+docs/                     # Architecture, Security, Deployment, Contributing, Releasing
 public/
   llms.txt                # LLM context file (llmstxt.org standard)
 ```
@@ -264,6 +282,7 @@ public/
 | `/generator` | Static | Yes | Advanced password generator + analyzer — entropy, attack scenarios, security framework, copy/download |
 | `/analyzer` | Static | Yes | `.zefer` file inspector — public header without the passphrase |
 | `/mcp` | Static | Yes | zefer-cli as MCP server — setup, per-tool accordions, 5 tools, example call |
+| `/library` | Static | Yes | zefer-cli as a Node.js library (v1.3.0+) — install, ESM/CJS import, API, examples |
 | `/project` | Static | Yes | Project info, tech stack, creator, donate |
 | `/device` | Static | Yes | Device detection details + optimization guide |
 | `/install` | Static | Yes | Usage guide, self-hosting, PWA, native apps |
@@ -322,18 +341,23 @@ Pre-configure forms via URL for workflow automation. Every parameter has a long 
 ## Testing
 
 ```bash
-npm test              # Run 161 tests
-npm run test:watch    # Watch mode
+npm test               # Run the full suite
+npm run test:watch     # Watch mode
+npm run test:coverage  # Single run behind the 100% coverage gate
 ```
 
 | Metric | Value |
 |---|---|
-| Test files | 7 |
-| Total tests | 125 |
+| Test files | 60 |
+| Total tests | 969 |
 | Statements | 100% |
+| Branches | 100% |
 | Functions | 100% |
 | Lines | 100% |
-| Branches | 99.47% |
+
+Thresholds are enforced in `vitest.config.mts`; `.github/workflows/ci.yml`
+re-runs lint, typecheck, the coverage gate and the production build on Node.js
+20 and 22 for every push and pull request.
 
 ## Security Model
 
@@ -394,17 +418,19 @@ Contributions are welcome! Please read the [Contributing Guide](docs/CONTRIBUTIN
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Run tests (`npm test`) and verify types (`npx tsc --noEmit`)
+3. Run `npm run validate` — typecheck, lint, tests and build must all pass
 4. Submit a pull request
 
 ## Documentation
 
 | Document | Description |
 |---|---|
+| [**Wiki**](https://github.com/carrilloapps/zefer/wiki) | In-depth guides with diagrams and a glossary — algorithm, security model, `.zefer` format, channels (CLI/MCP/library), tools, comparisons |
 | [Architecture](docs/ARCHITECTURE.md) | Data flow, binary format, component tree, theming |
 | [Security](docs/SECURITY.md) | Threat model, cryptographic primitives, guarantees, limitations |
 | [Deployment](docs/DEPLOYMENT.md) | Vercel, Docker, static export, self-hosting |
-| [Contributing](docs/CONTRIBUTING.md) | Setup, conventions, PR workflow |
+| [Contributing](docs/CONTRIBUTING.md) | Setup, quality gates, CI, conventions, PR workflow |
+| [Releasing](docs/RELEASING.md) | Version checklist, gates, tag/release/deploy steps |
 | [Security Policy](SECURITY.md) | Vulnerability reporting, response timeline, scope |
 | [Code of Conduct](CODE_OF_CONDUCT.md) | Contributor Covenant community standards |
 | [Changelog](CHANGELOG.md) | Version history and release notes |

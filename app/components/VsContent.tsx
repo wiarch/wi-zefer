@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import {
-  Shield, Lock, Clock, Globe, Key, KeyRound, Eye, FileText, Zap, Cpu,
+  Shield, Lock, Clock, Globe, Key, KeyRound, Eye, FileText, Zap,
   CheckCircle2, XCircle, ArrowRight, ExternalLink, HelpCircle, Monitor,
   HardDrive, Cloud, Users,
 } from "lucide-react";
@@ -159,13 +160,13 @@ const COMPETITORS: Record<string, CompetitorData> = {
   },
 };
 
-function StatusIcon({ status }: { status: Status }) {
+function StatusIcon({ status }: Readonly<{ status: Status }>) {
   if (status === "yes") return <CheckCircle2 className="w-4 h-4 text-primary" />;
   if (status === "no") return <XCircle className="w-4 h-4 theme-faint" />;
   return <CheckCircle2 className="w-4 h-4 text-[var(--warning-text)]" />;
 }
 
-export default function VsContent({ competitor }: { competitor: keyof typeof COMPETITORS }) {
+export default function VsContent({ competitor }: Readonly<{ competitor: keyof typeof COMPETITORS }>) {
   const { t } = useLanguage();
   const data = COMPETITORS[competitor];
 
@@ -288,7 +289,7 @@ export default function VsContent({ competitor }: { competitor: keyof typeof COM
       <GlassCard glow className="text-center">
         <h2 className="text-lg font-semibold theme-heading mb-2">{t("vs.cta.title")}</h2>
         <p className="text-sm theme-muted mb-5">{t("vs.cta.desc")}</p>
-        <a href="/" className="btn-primary !w-auto inline-flex px-8">{t("vs.cta.button")} <ArrowRight className="w-4 h-4" /></a>
+        <Link href="/" className="btn-primary !w-auto inline-flex px-8">{t("vs.cta.button")} <ArrowRight className="w-4 h-4" /></Link>
       </GlassCard>
     </PageLayout>
   );

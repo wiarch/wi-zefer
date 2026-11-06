@@ -11,9 +11,6 @@ const LOW_ITERATIONS = 1000;
 beforeAll(async () => {
   const compression = await import("../compression");
 
-  const origCompress = compression.compressBytes;
-  const origDecompress = compression.decompressBytes;
-
   // Wrap compressBytes: convert ArrayBuffer arg to Uint8Array for Node compat
   vi.spyOn(compression, "compressBytes").mockImplementation(
     async (data: Uint8Array, method: import("../compression").CompressionMethod) => {
@@ -244,7 +241,7 @@ describe("decodeZefer", () => {
     expect(mainResult.ok).toBe(true);
     if (mainResult.ok) {
       expect(mainResult.payload.fileData).not.toBeNull();
-      const decryptedBytes = new Uint8Array(mainResult.payload.fileData!);
+      const decryptedBytes = new Uint8Array(mainResult.payload.fileData as ArrayBuffer);
       expect(decryptedBytes).toEqual(originalBytes);
       expect(mainResult.header.mode).toBe("file");
     }
@@ -254,7 +251,7 @@ describe("decodeZefer", () => {
     expect(revealResult.ok).toBe(true);
     if (revealResult.ok) {
       expect(revealResult.payload.fileData).not.toBeNull();
-      const decryptedBytes = new Uint8Array(revealResult.payload.fileData!);
+      const decryptedBytes = new Uint8Array(revealResult.payload.fileData as ArrayBuffer);
       expect(decryptedBytes).toEqual(originalBytes);
     }
   });
