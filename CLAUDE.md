@@ -308,3 +308,27 @@ Workflow guidance:
 - `.codegraph/` and `.claude/settings.local.json` are machine-local and gitignored — never commit them
 
 @AGENTS.md
+
+
+## WI Arch Security Baseline (mandatory)
+
+This fork is also the central security-reference repository for WI Arch. Read these documents before security-sensitive work:
+
+- `docs/WI-ARCH-SECURITY-BASELINE.md` — minimum security requirements across all WI Arch products.
+- `docs/WI-ARCH-SECURITY-ADOPTION.md` — stack-specific adoption checklist for Laravel, React/Node, Flutter, Tauri/Rust and Supabase.
+- `docs/WI-ARCH-SECURITY-REVIEW.md` — current source-review findings and limitations.
+
+Rules for every change:
+
+1. Do not describe Zefer as an identity provider, authorization framework, KMS or universal application-security layer.
+2. Never put passphrases, passwords, tokens or reset secrets in URLs, logs, shell history or process arguments.
+3. Treat file headers and encrypted-container metadata as attacker-controlled. Validate all lengths, types, enum values and KDF parameters before parsing or expensive cryptographic work.
+4. Do not treat client-side expiration, IP checks or max-attempt counters as server-side access control.
+5. Disclose external network calls. The optional IP restriction currently queries external IP lookup providers.
+6. Preserve upstream attribution and keep this fork synchronized with upstream security fixes. Record every local deviation.
+7. Add adversarial tests for malformed headers, oversized lengths, invalid KDF parameters, truncated chunks, decompression limits and legacy-format compatibility.
+8. Do not lower coverage thresholds, suppress scanner findings broadly or convert security scans into report-only checks without documenting why.
+9. Do not claim an audit, certification, zero-knowledge guarantee or complete E2EE unless the exact scope has been independently assessed.
+10. For changes affecting cryptographic formats, KDF parameters or key handling, require explicit compatibility analysis and expert review before release.
+
+The security baseline is an engineering standard, not proof that all WI Arch repositories comply. Every product must demonstrate its own controls with source, tests and deployment evidence.
