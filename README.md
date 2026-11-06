@@ -6,7 +6,7 @@
 
 **Share secrets, not risks.**
 
-Client-side encryption tool that converts text and files into password-protected `.zefer` files using AES-256-GCM. 100% browser-based — no servers, no traces, no cookies.
+Client-side encryption tool that converts text and files into password-protected `.zefer` files using AES-256-GCM. Encryption and decryption run in the browser. The optional IP-restriction feature contacts external IP lookup providers; see the security notes below.
 
 [![Live](https://img.shields.io/badge/Live-zefer.carrillo.app-22c55e?style=flat-square)](https://zefer.carrillo.app)
 [![Wiki](https://img.shields.io/badge/docs-Wiki-22c55e?style=flat-square&logo=github&logoColor=white)](https://github.com/carrilloapps/zefer/wiki)
@@ -27,9 +27,25 @@ Client-side encryption tool that converts text and files into password-protected
 
 <br />
 
-[Live Demo](https://zefer.carrillo.app) · [CLI (zefer-cli)](https://github.com/carrilloapps/zefer-cli) · [Report Bug](https://github.com/carrilloapps/zefer/issues/new?template=bug_report.md) · [Request Feature](https://github.com/carrilloapps/zefer/issues/new?template=feature_request.md) · [Security Report](https://github.com/carrilloapps/zefer/issues/new?template=security_vulnerability.md) · [Documentation](docs/)
+[Live Demo](https://zefer.carrillo.app) · [CLI (zefer-cli)](https://github.com/carrilloapps/zefer-cli) · [WI Arch security baseline](docs/WI-ARCH-SECURITY-BASELINE.md) · [Report Bug](https://github.com/carrilloapps/zefer/issues/new?template=bug_report.md) · [Request Feature](https://github.com/carrilloapps/zefer/issues/new?template=feature_request.md) · [Security Report](https://github.com/carrilloapps/zefer/issues/new?template=security_vulnerability.md) · [Documentation](docs/)
 
 </div>
+
+---
+
+## WI Arch security role
+
+This repository is a fork of [carrilloapps/zefer](https://github.com/carrilloapps/zefer), which remains the upstream project and original source of the application.
+
+WI Arch maintains this fork as its central reference for security engineering practices and client-side encrypted-file tooling. The shared rules are documented in the [WI Arch Security Baseline](docs/WI-ARCH-SECURITY-BASELINE.md), with a [per-repository adoption checklist](docs/WI-ARCH-SECURITY-ADOPTION.md) and [source review](docs/WI-ARCH-SECURITY-REVIEW.md).
+
+**Important:** Zefer does not automatically secure other WI Arch applications. It is not an identity provider, authorization framework, KMS or server-side secrets manager. Every product must implement and test its own authentication, authorization, tenant isolation, secure storage, API protections, deployment controls and backups.
+
+The WI Arch review also identifies hardening work still required in this fork. Do not interpret the upstream test coverage or security scanners as an independent audit or certification.
+
+### Privacy note
+
+Encryption and decryption are performed locally by the browser. If the user enables IP restrictions, the application queries external IP lookup providers to determine the public IP. The user's IP is therefore disclosed to those providers for that feature. IP restrictions, expiration and attempt limits are client-side convenience controls, not substitutes for server-side authorization.
 
 ---
 
